@@ -1,0 +1,31 @@
+<IfModule mod_rewrite.c>
+#    <IfModule mod_negotiation.c>
+#        Options -MultiViews
+#    </IfModule>
+
+#    <Files ~ "\.">
+#        Header set X-Superglue-Dotless "text/html Content-Type was forced"
+#        Header set Content-Type "text/html"
+#    </Files>
+    
+#    Header set X-Superglue-Version "0.1-git_1"
+
+    AddType application/x-httpd-php .php .phar
+
+    RewriteEngine On
+
+    # Redirect Trailing Slashes...
+    RewriteRule ^(.*)/$ /$1 [L,R=301]
+
+#    RewriteRule ^extension/(.*) Superglue/extension/$1 [L]
+#    RewriteRule ^resource/(.*) Superglue/resource/$1 [L]
+
+    # Handle Posts
+    RewriteCond %{REQUEST_METHOD} =POST
+    RewriteRule ^ Superglue.loader.php [L]
+
+    # Handle Front Controller...
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteRule ^ Superglue.loader.php [L]
+</IfModule>
