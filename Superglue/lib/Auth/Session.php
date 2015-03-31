@@ -1,34 +1,48 @@
 <?php
 
 namespace Superglue\Auth;
-use Superglue\Server as SG;
 
-class Session implements \Superglue\Interfaces\Auth {
+class Session implements \Superglue\Interfaces\Auth, \Superglue\Interfaces\Controller {
+    
+    private $options = NULL;
     
     protected $user = NULL;
     
     public function __construct($options = array()){
         session_start();
         
-        if (isset($_SESSION['sg-login-token']) and isset(SG::request()->uri) and "/{$_SESSION['sg-login-token']}" == SG::request()->uri){
-//            var_dump($_SESSION['sg-login-token']);
-            unset($_SESSION['sg-login-token']);
-            if (isset($_REQUEST['user']) and isset($_REQUEST['pass'])){
-                if ($_REQUEST['user'] ==  $options['user'] and $_REQUEST['pass'] == $options['pass']){
-                    $_SESSION['user'] = $_REQUEST['user'];
-                }
-            }
-        }
+        $this->options = $options;
+        
         if (isset($_SESSION['user'])){
             $this->user = $_SESSION['user'];
         }
     }
     
+    public function postLogin(){
+        if ($this->isAuthorized()){
+            return;
+        }
+        
+        
+        if (isset($_REQUEST['user']) and isset($_REQUEST['pass'])){
+            if ($_REQUEST['user'] ==  $this->options['user']
+                    and $_REQUEST['pass'] == $this->options['pass']){
+                $_SESSION['user'] = $_REQUEST['user'];
+                die('success!');
+            }
+        }
+        
+        die('failure!');
+    }
+    
     public function authorize() {
         if ($this->user == NULL){
-            $loginToken = 'sg-login-'.md5(time());
-            $_SESSION['sg-login-token'] = $loginToken;
-            echo SG::loadResource('login.php',array('loginToken'=>$loginToken));
+//            $loginToken = 'sg-login-'.md5(time());
+//            \Superglue::flashRoute($loginToken, '')
+//            $_SESSION['sg-login-token'] = $loginToken;
+            
+            header('HTTP/1.0 401 Unauthorized');
+            echo \Superglue::loadResource('login.php');
             exit;
         }
     }

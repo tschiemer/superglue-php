@@ -1,7 +1,6 @@
 <?php
 
 namespace Superglue\Interfaces;
-use Superglue\Server as SG;
 
 abstract class Config {
     
@@ -34,5 +33,9 @@ abstract class Config {
             return $this->__set($name,reset($arguments));
         }
     }
+    
+    
+    abstract public function isSavable();
+    abstract public function save();
     
 }

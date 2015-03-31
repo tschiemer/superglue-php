@@ -8,7 +8,7 @@ class Cp implements \Superglue\Interfaces\Command {
     public static function run($argc, $argv){
         
         if ($argc != 2){
-            SG::abort(300,'Wrong argument count');
+            throw new Exception('Wrong argument count', 300);
         }
         list($from,$to) = $argv;
 

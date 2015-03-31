@@ -1,6 +1,7 @@
 <?php
 
-define('IS_PHAR', (bool)Phar::running());
+
+//define('IS_PHAR', (bool)Phar::running());
 //define('__PHAR__', IS_PHAR ? Phar::running().DIRECTORY_SEPARATOR : __DIR__.DIRECTORY_SEPARATOR);
 //if (defined('__ROOT__'))
 //var_dump(__ROOT__);
@@ -19,13 +20,19 @@ define('IS_PHAR', (bool)Phar::running());
  * @author http://www.php-fig.org/psr/psr-4/examples/
  */
 spl_autoload_register(function ($class) {
-
+    
     // project-specific namespace prefix
     $prefix = 'Superglue\\';
 
     // base directory for the namespace prefix
     $base_dir = __DIR__.DIRECTORY_SEPARATOR.'Superglue'.DIRECTORY_SEPARATOR.'lib'.DIRECTORY_SEPARATOR;
 
+    if ($class == 'Superglue'){
+        require $base_dir . 'Superglue' . '.php';
+        return;
+    }
+
+    
     // does the class use the namespace prefix?
     $len = strlen($prefix);
     if (strncmp($prefix, $class, $len) !== 0) {
@@ -61,8 +68,14 @@ set_exception_handler(function(\Exception $exception){
 //    
 //}
 
-$config =  new \Superglue\Config\Php( __DIR__ . DIRECTORY_SEPARATOR .'Superglue.config.php');
 
-$superglue = new \Superglue\Server($config);
+define('__ROOT__',__DIR__ . DIRECTORY_SEPARATOR );
 
-$superglue->run();
+$config =  new \Superglue\Config\Php( __ROOT__ .'Superglue.config.php' );
+
+//use \Superglue\Server as Superglue;
+
+//$superglue = new \Superglue\Server($config);
+$superglue = new Superglue($config);
+
+$superglue->init()->run();

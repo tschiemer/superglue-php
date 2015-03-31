@@ -1,17 +1,16 @@
 <?php
 
 namespace Superglue\Command;
-use Superglue\Server as SG;
 
 class Ls implements \Superglue\Interfaces\Command {
     
     public static function run($argc,$argv){
         if ($argc != 2){
-            SG::abort(300,"Wrong argument count");
+            throw new \Superglue\Exception('Wrong argument count', 300);
         }
         list($optionsLA,$path) = $argv;
         
-        $safePath = SG::path($path);
+        $safePath = \Superglue::path($path);
         
         $files = scandir($safePath, SCANDIR_SORT_ASCENDING);
         
@@ -19,13 +18,24 @@ class Ls implements \Superglue\Interfaces\Command {
            return !($fname == '.' or $fname == '..'); 
         });
         
+        $path = str_replace('//','/',$path.DIRECTORY_SEPARATOR);
+        
         $files = array_map(function($fname)use($path){
             
-            $fname = $path . DIRECTORY_SEPARATOR . $fname;
+            $fname = $path . $fname;
             
-            $realfile = SG::path($fname);
+            $realfile = \Superglue::path($fname);
             
-            $type = filetype($realfile);
+            switch(filetype($realfile)){
+                case 'dir':
+                    $type = 'directory';
+                    break;
+                case 'file':
+                    $type = 'regular file';
+                    break;
+                default:
+                    $type = 'unknown';
+            }
             $size = filesize($realfile);
             $owner = posix_getpwuid(fileowner($realfile));
             $group = posix_getgrgid(filegroup($realfile));

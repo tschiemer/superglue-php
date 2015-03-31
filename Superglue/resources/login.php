@@ -7,7 +7,7 @@
     </head>
     <body>
         <h1>Superglue Login</h1>
-        <form action="<?php echo \Superglue\Server::url($loginToken); ?>" method="POST">
+        <form action="<?php echo \Superglue::callbackUrl('auth/login'); ?>" method="POST">
             <div>
                 <input type="text" name="user" placeholder="Your username"/>
             </div>
