@@ -1,6 +1,5 @@
 <?php
 
-//namespace Superglue;
 use Superglue\Exceptions\Exception as Exception;
 use Superglue\Exceptions\NotFoundException as NotFoundException;
 
@@ -54,29 +53,6 @@ class Superglue {
         return self::$instance->auth;
     }
     
-//    
-//    /**
-//     *
-//     * @var \Superglue\Interfaces\FileSystem
-//     */
-//    protected $fs;
-//    
-//    public function fs(\Superglue\Interfaces\FileSystem $fs = NULL){
-//        if ($fs != NULL){
-//            $this->fs = $fs;
-//            return $this;
-//        }
-//        return $this->fs;
-//    }
-    
-    
-//    
-//    public static function __callStatic($name, $arguments) {
-//        if (in_array($name,array('request','config','auth','fs'))){
-//            return call_user_method_array($name, self::$instance, $arguments);
-//        }
-//    }
-    
     
     public function init(){
         
@@ -111,16 +87,12 @@ class Superglue {
     
     public function run(){
         
-//        $method = $this->request->method();
-//        $uri = $this->request->uri();
-        
-//        $this->abort();
-        
 //        var_dump('Method: '.$this->request->method);
 //        var_dump('URI: '.$this->request->uri);
         
-//        processFlashRoutes();
-        
+        /*
+         *  1st: Handle any incoming commands (can not be overridden)
+         */
         if ($this->request->method() == 'post' and $this->request->uri() == '/cmd'){
             
             $this->auth->authorize();
@@ -128,50 +100,47 @@ class Superglue {
             return $this->serveCommand();
         }
         
-//        var_dump('/\/'.preg_quote($this->config->callbackPrefix,'/').'(.+)/');
-        if (preg_match('/^\/'.preg_quote($this->config->callbackPrefix,'/').'([a-zA-Z]{1,1}[a-zA-Z0-9]+)\/([a-zA-Z]+)((\/[a-zA-Z0-9-]+)*)/',$this->request->uri(),$matches)){
-//            var_dump($matches);
-            $controller = $matches[1];
-            $method = $matches[2];
-            if (empty($matches[3])){
-                $params = array();
-            } else {
-                $params = explode('/',substr($matches[3],1));
-            }
+        /*
+         *  2nd: See if there's any controller that matches the request
+         */
+        $controllerName = ucfirst($this->request->segment(0));
+        if (class_exists($controllerName)){
             
-            if ($this->serveController($controller,$method,$params)){
-                return;
+            $params = $this->request->segments(1);
+            
+            if (empty($params)){
+                $methodName = 'Index';
+            } else {
+                $methodName = ucfirst(array_shift($params));
             }
-                    
+            $methodName = $this->request->method() . $methodName;
+            
+            $reflect = new ReflectionClass($controllerName);
+            if ($reflect->implementsInterface('\Superglue\Interfaces\Controller')
+                    and $reflect->hasMethod($methodName)){
+                
+                return $this->serveController($controllerName, $methodName, $params);
+            }
         }
         
+        
+        /*
+         * 3rd: assume that posts are file uploads and try to save files
+         */
         if ($this->request->method() === 'post'){
             // assume attempting to upload file
             return $this->serveFileUpload();
         }
-    }
-    
-    
-    public function serveController($controller,$method,$params){
         
-        $methodName = $this->request->method() . ucfirst($method);
-        
-        if (in_array($controller,array('auth'))){
-            if (method_exists($this->$controller, $methodName)){
-                call_user_func_array(array($this->$controller,$methodName), $params);
-                exit;
-            }
-        } elseif (class_exists($controller)){
-            $check = new ReflectionClass($controller);
-            if ($check->implementsInterface('\Superglue\Interfaces\Controller')
-                and $check->hasMethod($methodName)){
-                call_user_func_array("{$controller}::{$methodName}",$params);
-                exit;
-            }
-        }
         
         throw new NotFoundException("Controller/method not found: {$controller}/{$method}");
     }
+    
+    public function serveController($controller, $method, $params){
+        $controller = new $controllerName();
+        return call_user_func_array(array($controller,$methodName),$params);
+    }
+    
     
     public function serveCommand(){
         $varg = explode(' ',$this->request->content());

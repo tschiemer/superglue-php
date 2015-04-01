@@ -2,7 +2,7 @@
 
 namespace Superglue\Auth;
 
-class Session implements \Superglue\Interfaces\Auth, \Superglue\Interfaces\Controller {
+class Session implements \Superglue\Interfaces\Auth {
     
     private $options = NULL;
     
@@ -28,6 +28,15 @@ class Session implements \Superglue\Interfaces\Auth, \Superglue\Interfaces\Contr
             exit;
         }
     }
+    
+    public function login($user,$pass){
+        if ($user ==  $this->options['user'] and $pass == $this->options['pass']){
+            $_SESSION['user'] = $user;
+            return TRUE;
+        }
+        return FALSE;
+    }
+    
     public function logout() {
         unset($_SESSION['user']);
         $this->user = NULL;
@@ -51,33 +60,33 @@ class Session implements \Superglue\Interfaces\Auth, \Superglue\Interfaces\Contr
     
     
     
-    public function getLogin(){
-        echo \Superglue::loadResource('login.php');
-    }
-    
-    public function postLogin(){
-        if ($this->isAuthorized()){
-            die('already logged in');
-            return;
-        }
-        
-        
-        if (isset($_REQUEST['user']) and isset($_REQUEST['pass'])){
-            if ($_REQUEST['user'] ==  $this->options['user']
-                    and $_REQUEST['pass'] == $this->options['pass']){
-                $_SESSION['user'] = $_REQUEST['user'];
-                die('success!');
-            }
-        }
-        
-        $this->getLogin();
-        
-    }
-    
-    public function getLogout(){
-        $this->logout();
-        die('logged out');
-    }
+//    public function getLogin(){
+//        echo \Superglue::loadResource('login.php');
+//    }
+//    
+//    public function postLogin(){
+//        if ($this->isAuthorized()){
+//            die('already logged in');
+//            return;
+//        }
+//        
+//        
+//        if (isset($_REQUEST['user']) and isset($_REQUEST['pass'])){
+//            if ($_REQUEST['user'] ==  $this->options['user']
+//                    and $_REQUEST['pass'] == $this->options['pass']){
+//                $_SESSION['user'] = $_REQUEST['user'];
+//                die('success!');
+//            }
+//        }
+//        
+//        $this->getLogin();
+//        
+//    }
+//    
+//    public function getLogout(){
+//        $this->logout();
+//        die('logged out');
+//    }
     
     
 }

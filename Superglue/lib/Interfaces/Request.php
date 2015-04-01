@@ -15,6 +15,18 @@ interface Request {
     public function uri();
     
     /**
+     * @param int $i
+     */
+    public function segment($i);
+    
+    /**
+     * 
+     * @param int $from
+     * @param int $to
+     */
+    public function segments($from=NULL,$to=NULL);
+    
+    /**
      * @return mixed
      */
     public function content();

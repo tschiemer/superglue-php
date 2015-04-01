@@ -18,9 +18,15 @@ class Request  implements \Superglue\Interfaces\Request {
     
     /**
      *
+     * @var array
+     */
+    protected $segments;
+    
+    /**
+     *
      * @var string
      */
-    public $contentType;
+    protected $contentType;
 //    
 //    /**
 //     * Encoding or charset
@@ -35,9 +41,8 @@ class Request  implements \Superglue\Interfaces\Request {
         $basedir = dirname($_SERVER['SCRIPT_NAME']);
         $this->uri = substr($_SERVER['REQUEST_URI'], strlen($basedir)-1);
         
-//        var_dump($this->uri);
-//        var_dump($basedir);
-//        var_dump($_SERVER['REQUEST_URI']);
+        $this->segments = explode('/',substr($this->uri,1));
+        
         
         if ($this->method == 'post'){
             $ct = strtolower($_SERVER["CONTENT_TYPE"]);
@@ -65,6 +70,17 @@ class Request  implements \Superglue\Interfaces\Request {
     
     public function uri(){
         return $this->uri;
+    }
+    
+    public function segment($i){
+        return $this->segments[$i];
+    }
+    
+    public function segments($from = 0, $to = NULL){
+        if ($to === NULL){
+            $to = count($this->segments);
+        }
+        return array_slice($this->segments, $from, $to - $from + 1);
     }
     
     public function content(){

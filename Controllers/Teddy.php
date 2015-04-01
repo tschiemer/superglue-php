@@ -2,7 +2,11 @@
 
 class Teddy implements \Superglue\Interfaces\Controller {
     
-    public static function getHi(){
+    public function getIndex(){
+        echo "This is for real, dude!";
+    }
+    
+    public function getHi(){
         echo "Hi Teddy!" . implode(' ',  func_get_args());
     }
     
