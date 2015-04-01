@@ -1,12 +1,13 @@
 <?php
 
 return array(
-    'callbackPrefix' => isset($_ENV['SUPERGLUE_CALLBACK']) ? $_ENV['SUPERGLUE_CALLBACK'] : 'Superglue:/',
+    'url' => getenv('SUPERGLUE_BASE') ? getenv('SUPERGLUE_BASE') : str_replace('//','/',dirname($_SERVER['SCRIPT_NAME']) . '/'),
     
-    'publicBase' => realpath(__DIR__ . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR,
+    'callbackPrefix' => getenv('SUPERGLUE_CALLBACK') ? getenv('SUPERGLUE_CALLBACK') : '',
     
-    'url' => isset($_ENV['SUPERGLUE_BASE']) ? $_ENV['SUPERGLUE_CALLBACK'] : str_replace('//','/',dirname($_SERVER['SCRIPT_NAME']) . '/'),
+    'publicPath' => __ROOT__ . 'public' . DIRECTORY_SEPARATOR,
     
+    'resourcePath' => __DIR__ . '/resources' . DIRECTORY_SEPARATOR,
     'resourceUrl'   => dirname($_SERVER['SCRIPT_NAME']) . '/Superglue/resources/',
     
     'auth' => array(

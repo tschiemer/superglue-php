@@ -14,7 +14,11 @@ class Php extends \Superglue\Interfaces\Config {
     public function __construct($path){
         $this->path = $path;
         
-        $default = require_once __ROOT__ . 'Superglue/default-config.php';
+        if (file_exists(__ROOT__ . 'Superglue/default-config.php')){
+            $default = require_once __ROOT__ . 'Superglue/default-config.php';
+        } else {
+            $default = array();
+        }
         $override = require_once $path;
         
         $this->config = array_merge($default,$override);

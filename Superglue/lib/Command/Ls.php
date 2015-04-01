@@ -12,6 +12,10 @@ class Ls implements \Superglue\Interfaces\Command {
         
         $safePath = \Superglue::path($path);
         
+        if (!file_exists($safePath)){
+            return;
+        }
+        
         $files = scandir($safePath, SCANDIR_SORT_ASCENDING);
         
         $files = array_filter($files, function($fname){
@@ -45,7 +49,7 @@ class Ls implements \Superglue\Interfaces\Command {
             return "{$fname}\t{$type}\t{$size}\t{$timestamp}\t{$owner['name']}\t{$group['name']}\t{$perms}";
         }, $files);
         
-        return implode("\n",$files);
+        return implode("\n",$files)."\n";
     }
     
 }

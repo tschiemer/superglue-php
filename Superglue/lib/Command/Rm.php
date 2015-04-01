@@ -1,19 +1,50 @@
 <?php
 
 namespace Superglue\Command;
-use Superglue\Server as SG;
 
 class Rm implements \Superglue\Interfaces\Command {
     
     public static function run($argc, $argv){
         
-        if ($argc != 1){
-            SG::abort(300,'Wrong argument count');
+//        if ($argc = 2){
+//            throw new \Superglue\Exception('Wrong argument count',300);
+//        }
+        if ($argc == 1){
+            list($path) = $argv;
+        } else if ($argc == 2){
+            list($optionRecursive,$path) = $argv;
+        } else {
+            throw new \Superglue\Exception('Wrong argument count', 300);
         }
-        list($path) = $argv;
         
-        $path = SG::path($path);
+        $path = \Superglue::path($path);
         
-        unlink($path);
+        self::delete($path);
+    }
+    
+    /**
+     * 
+     * @param string $dirPath
+     * @throws InvalidArgumentException
+     * @author http://stackoverflow.com/questions/3349753/delete-directory-with-files-in-it
+     */
+    private static function delete($path){
+        if (is_file($path)){
+            unlink($path);
+            return;
+        } else if (is_dir($path)){
+            if (substr($dirPath, - 1) != '/') {
+                $dirPath .= '/';
+            }
+            $files = glob($path . '*', GLOB_MARK);
+            foreach ($files as $file) {
+                if (is_dir($file)) {
+                    self::delete($file);
+                } else {
+                    unlink($file);
+                }
+            }
+            rmdir($path);
+        }
     }
 }

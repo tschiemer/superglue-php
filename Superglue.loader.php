@@ -1,11 +1,5 @@
 <?php
 
-
-//define('IS_PHAR', (bool)Phar::running());
-//define('__PHAR__', IS_PHAR ? Phar::running().DIRECTORY_SEPARATOR : __DIR__.DIRECTORY_SEPARATOR);
-//if (defined('__ROOT__'))
-//var_dump(__ROOT__);
-
 /**
  * An example of a project-specific implementation.
  * 
@@ -55,27 +49,28 @@ spl_autoload_register(function ($class) {
     
 });
 
-set_exception_handler(function(\Exception $exception){
+spl_autoload_register(function ($class) {
+    $base_dir = __DIR__ . DIRECTORY_SEPARATOR . 'Controllers' . DIRECTORY_SEPARATOR;
+    
+    $file = $base_dir . $class . '.php';
+    if (file_exists($file)){
+        require $file;
+    }
+});
+
+set_exception_handler(function(\Superglue\Exceptions\Exception $exception){
+    if ($exception instanceof \Superglue\Exceptions\NotFoundException){
+        die('not found!');
+    }
     echo 'Error ' . $exception->getCode() . ': ' . $exception->getMessage();
     exit;
 });
 
-//$cfgpath = __ROOT__ . '/superglue.config.php';
-//if (file_exists($cfgpath)){
-//    $config = new \Superglue\Config(require __ROOT__ . DIRECTORY_SEPARATOR . 'superglue.config.php');
-//} else {
-//    $config = new \Superglue\Config(require __DIR__ . DIRECTORY_SEPARATOR . 'config.default.php');
-//    
-//}
 
-
-define('__ROOT__',__DIR__ . DIRECTORY_SEPARATOR );
+define('__ROOT__', __DIR__ . DIRECTORY_SEPARATOR );
 
 $config =  new \Superglue\Config\Php( __ROOT__ .'Superglue.config.php' );
 
-//use \Superglue\Server as Superglue;
-
-//$superglue = new \Superglue\Server($config);
 $superglue = new Superglue($config);
 
 $superglue->init()->run();

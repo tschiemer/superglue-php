@@ -16,7 +16,7 @@ abstract class Config {
     
     public function __get($name){
         if (!isset($this->config[$name])){
-            throw new \Superglue\Exception("Config value '{$name}' does not exist!");
+            throw new \Superglue\Exceptions\Exception("Config value '{$name}' does not exist!");
         }
         return $this->config[$name];
     }

@@ -1,5 +1,5 @@
 <?php
 
-namespace Superglue;
+namespace Superglue\Exceptions;
 
 class Exception extends \Exception {}

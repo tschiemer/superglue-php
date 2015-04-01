@@ -12,7 +12,7 @@
 		</style>
 		<style type="text/css" data-superglue-css="user">
 		</style>
-                <link rel="stylesheet" href="<?php echo \Superglue\Server::resourceUrl('css/SuperGlue.css'); ?>" data-superglue-css="CSS4TextElement">
+                <link rel="stylesheet" href="<?php echo Superglue::resourceUrl('css/SuperGlue.css'); ?>" data-superglue-css="CSS4TextElement">
 	</head>
 	<body style="">
 		<div id="sg-page" data-superglue-grid="off/0px">

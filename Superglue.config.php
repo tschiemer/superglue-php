@@ -1,12 +1,6 @@
 <?php
 
 return array(
-//    'publicBase' => __DIR__ . DIRECTORY_SEPARATOR,
-    
-    'url' => 'http://superglue.local:8000/',
-    
-//    'resourceUrl'   => 'http://localhost:8000/dev/superglue/public/Superglue/resources/',
-    
     
 //    'auth' => array(
 //        'driver'    => '\\Superglue\\Auth\\Http',

@@ -1,6 +1,6 @@
 SetEnv SUPERGLUE_VERSION 0.1-git_1
 SetEnv SUPERGLUE_BASE http://superglue.local:8000/
-SetEnv SUPERGLUE_CALLBACK Superglue:
+SetEnv SUPERGLUE_CALLBACK 
 
 
 <IfModule mod_headers.c>

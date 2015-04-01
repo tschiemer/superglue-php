@@ -1,7 +1,8 @@
 <?php
 
 //namespace Superglue;
-
+use Superglue\Exceptions\Exception as Exception;
+use Superglue\Exceptions\NotFoundException as NotFoundException;
 
 /**
  * 
@@ -125,8 +126,15 @@ class Superglue {
         
 //        processFlashRoutes();
         
+        if ($this->request->method() == 'post' and $this->request->uri() == '/cmd'){
+            
+            $this->auth->authorize();
+            
+            return $this->serveCommand();
+        }
+        
 //        var_dump('/\/'.preg_quote($this->config->callbackPrefix,'/').'(.+)/');
-        if (preg_match('/^\/'.preg_quote($this->config->callbackPrefix,'/').'([a-zA-Z]+)\/([a-zA-Z]+)((\/[a-zA-Z0-9-]+)*)/',$this->request->uri(),$matches)){
+        if (preg_match('/^\/'.preg_quote($this->config->callbackPrefix,'/').'([a-zA-Z]{1,1}[a-zA-Z0-9]+)\/([a-zA-Z]+)((\/[a-zA-Z0-9-]+)*)/',$this->request->uri(),$matches)){
 //            var_dump($matches);
             $controller = $matches[1];
             $method = $matches[2];
@@ -135,64 +143,19 @@ class Superglue {
             } else {
                 $params = explode('/',substr($matches[3],1));
             }
-            $this->serveController($controller,$method,$params);
-            exit;
+            
+            if ($this->serveController($controller,$method,$params)){
+                return;
+            }
+                    
         }
         
         if ($this->request->method() === 'post'){
-            
-            $this->auth->authorize();
-            
-//            var_dump($this->request->uri());
-            
-            if($this->request->uri() == '/cmd'){
-                $this->serveCommand();
-            } else {
-                // assume attempting to upload file
-                $this->serveFileUpload();
-            }
-            
+            // assume attempting to upload file
+            return $this->serveFileUpload();
         }
-//        else if ($this->request->method() === 'get'){
-//            
-//            if (preg_match('/(extension|resources)\/(.+)/',$this->request->uri(),$matches)){
-//                $file = "Superglue/{$matches[0]}";
-//                
-//                if (!file_exists($file)){
-//                    self::abort(404,"File not found: {$this->request->uri()}");
-//                }
-//                
-//                $finfo = finfo_open(FILEINFO_MIME_TYPE); // return mime type ala mimetype extension
-//                $mime = finfo_file($finfo, $file);
-//                finfo_close($finfo);
-//                
-//                header("Content-Type: {$mime}");
-//                readfile($file);
-//                exit;
-//            }
-//        }
-               
-//        var_dump($this);
     }
     
-//    public static function flashRoute($route,$handler){
-//        session_start();
-//        if (!isset($_SESSION['sg-routes'])){
-//            $_SESSION['sg-routes'] = array();
-//        }
-//        $_SESSION['sg-routes'][$route] = $handler;
-//    }
-//    
-//    public function processFlashRoutes(){
-//        session_start();
-//        if (isset($_SESSION['sg-routes'])){
-//            $uri = $this->request()->uri();
-//            $routes = array_filter(array_keys($_SESSION['sg-routes']),function($key)use($uri){
-//                return $key == $uri;
-//            });
-//            var_dump($routes);
-//        }
-//    }
     
     public function serveController($controller,$method,$params){
         
@@ -201,16 +164,18 @@ class Superglue {
         if (in_array($controller,array('auth'))){
             if (method_exists($this->$controller, $methodName)){
                 call_user_func_array(array($this->$controller,$methodName), $params);
+                exit;
             }
         } elseif (class_exists($controller)){
             $check = new ReflectionClass($controller);
             if ($check->implementsInterface('\Superglue\Interfaces\Controller')
                 and $check->hasMethod($methodName)){
                 call_user_func_array("{$controller}::{$methodName}",$params);
+                exit;
             }
         }
         
-        throw new \Superglue\Exception("Controller/method not found: {$controller}/{$method}",404);
+        throw new NotFoundException("Controller/method not found: {$controller}/{$method}");
     }
     
     public function serveCommand(){
@@ -229,22 +194,23 @@ class Superglue {
             /*
              * errorCheck '1' "'$_EXE': bad command" ;;
              */
-            throw new \Superglue\Exception("{$cmdName}: bad command",404);
+            throw new NotFoundException("{$cmdName}: bad command");
         }
     }
     
     public function serveFileUpload(){
-        $fname = ".{$this->request->uri()}";
-//        file_put_contents($fname, $this->request->content);
+        $destination = self::path(".{$this->request->uri()}");
+        $uploadedFile = $this->request->content();
+        
+        if ($uploadedFile['error'] != 0){
+            throw new \Superglue\Exception('An upload error occurred',300);
+        }
+        
+        move_uploaded_file($uploadedFile['tmp_name'], $destination);
     }
-//    
-//    public static function abort($code=300,$message=NULL){
-////        switch($code){
-////            default:
-//                throw new Exception($message,$code);
-////        }
-//    }
-
+    
+    
+    
     
     public static function url($path){
         return self::$instance->config->url . $path;
@@ -254,21 +220,18 @@ class Superglue {
         return self::$instance->config->url . self::$instance->config->callbackPrefix . $path;
     }
     
-    public static function resourceUrl($path){
-        return self::$instance->config->resourceUrl . $path;
-    }
     
     public static function path($path){
         
-        $out = self::$instance->config->publicBase . $path;
+        $out = self::$instance->config->publicPath . $path;
         
         $DS = preg_quote(DIRECTORY_SEPARATOR,'/');
         
         $replacements = array(
             "/{$DS}+/"          => DIRECTORY_SEPARATOR,
             "/{$DS}\.\.{$DS}/"  => DIRECTORY_SEPARATOR,
-            "/{$DS}\.\.$/"  => '',
-            "/{$DS}\.{$DS}/"     => DIRECTORY_SEPARATOR ,
+            "/{$DS}\.\.$/"      => '',
+            "/{$DS}\.{$DS}/"    => DIRECTORY_SEPARATOR ,
             "/{$DS}\.$/"        => ''
         );
         
@@ -276,19 +239,17 @@ class Superglue {
     }
     
     
+    public static function resourceUrl($path){
+        return self::$instance->config->resourceUrl . $path;
+    }
+    
     public static function resourcePath($path){
-        if (isset(self::$instance->config->resourceBase)){
-            $resourceBase = self::$instance->config->resourceBase;
-        } else {
-            $resourceBase = realpath(__DIR__.'/../resources').DIRECTORY_SEPARATOR;
-        }
-        return  $resourceBase . $path;
+        return  self::$instance->config->resourcePath . $path;
     }
     
     public static function loadResource($path,$vars=array()){
         $path = self::resourcePath($path);
         extract($vars);
-//        var_dump($path);
         ob_start();
         include $path;
         return ob_get_clean();

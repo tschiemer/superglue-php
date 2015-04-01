@@ -21,12 +21,12 @@ class Request  implements \Superglue\Interfaces\Request {
      * @var string
      */
     public $contentType;
-    
-    /**
-     * Encoding or charset
-     * @var string
-     */
-    public $contentEncoding;
+//    
+//    /**
+//     * Encoding or charset
+//     * @var string
+//     */
+//    public $contentEncoding;
     
     public function __construct(){
         
@@ -41,9 +41,11 @@ class Request  implements \Superglue\Interfaces\Request {
         
         if ($this->method == 'post'){
             $ct = strtolower($_SERVER["CONTENT_TYPE"]);
-            if (preg_match('/^(.+)(; charset=(.+)?)$/',$ct,$m)){
+            if (preg_match('/^(.+)(; ?([a-z]+)=(.+)?)$/',$ct,$m)){
                 $this->contentType = $m[1];
-                $this->contentCharset = $m[3];
+                $this->{'content'.ucfirst(strtolower($m[3]))} = $m[4];
+//                var_dump($this);
+//                exit;
             } else {
                 $this->contentType = $ct;
             }
@@ -72,8 +74,19 @@ class Request  implements \Superglue\Interfaces\Request {
             case 'application/x-www-form-urlencoded':
                 return $_POST['data'];
                 
+            case 'multipart/form-data':
+                if (!isset($_FILES) or !isset($_FILES['userimage'])){
+                    throw new \Superglue\Exception('No valid file uploaded',300);
+                }
+                return $_FILES['userimage'];
+                
             default:
-                return file_get_contents('php://input');
+                
+                var_dump($this);
+                var_dump($_FILES);
+                
+                $in = file_get_contents('php://input');
+                var_dump($in);
         }
     }
 }
