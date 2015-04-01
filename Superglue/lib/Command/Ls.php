@@ -6,7 +6,7 @@ class Ls implements \Superglue\Interfaces\Command {
     
     public static function run($argc,$argv){
         if ($argc != 2){
-            throw new \Superglue\Exception('Wrong argument count', 300);
+            throw new \Superglue\Exceptions\Exception('Wrong argument count', 300);
         }
         list($optionsLA,$path) = $argv;
         

@@ -81,12 +81,12 @@ class Request  implements \Superglue\Interfaces\Request {
                 return $_FILES['userimage'];
                 
             default:
+                return file_get_contents('php://input');
                 
-                var_dump($this);
-                var_dump($_FILES);
-                
-                $in = file_get_contents('php://input');
-                var_dump($in);
         }
     }
+    
+//    public function file($filename){
+//        
+//    }
 }

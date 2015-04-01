@@ -14,7 +14,7 @@ class Rm implements \Superglue\Interfaces\Command {
         } else if ($argc == 2){
             list($optionRecursive,$path) = $argv;
         } else {
-            throw new \Superglue\Exception('Wrong argument count', 300);
+            throw new \Superglue\Exceptions\Exception('Wrong argument count', 300);
         }
         
         $path = \Superglue::path($path);

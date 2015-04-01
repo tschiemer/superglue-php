@@ -18,4 +18,12 @@ interface Request {
      * @return mixed
      */
     public function content();
+//    
+//    /**
+//     * 
+//     * @param string $filename
+//     * @return array
+//     * @throws \Superglue\Exceptions\Exception
+//     */
+//    public function file($filename);
 }

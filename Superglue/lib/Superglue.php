@@ -9,8 +9,6 @@ use Superglue\Exceptions\NotFoundException as NotFoundException;
  */
 class Superglue {
     
-//    const SUPERGLUE_CALLBACK = 'Superglue://';
-    
     /**
      *
      * @var \Superglue
@@ -29,9 +27,6 @@ class Superglue {
      */
     protected $config;
     
-//    public function config(){
-//        return $this->config;
-//    }
     
     /**
      *
