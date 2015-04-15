@@ -54,7 +54,37 @@ class Superglue {
     }
     
     
+    public function exceptionHandler(Exception $e){
+        
+        if ($e instanceof \Superglue\Exceptions\NotFoundException){
+            die('not found!');
+        }
+        if ($e instanceof \Superglue\Exceptions\NotAuthorizedException){
+            die('not authorized!');
+        }
+        echo 'Error ' . $e->getCode() . ': ' . $e->getMessage();
+        exit;
+    }
+    
+    public function autoloader ($class) {
+        $base_dir = __ROOT__  . DIRECTORY_SEPARATOR . 'Controllers' . DIRECTORY_SEPARATOR;
+
+        $file = $base_dir . $class . '.php';
+
+        if (file_exists($file)){
+            require $file;
+        }
+    }
+    
     public function init(){
+        
+        if (isset($this->config->useInternalExceptionHandler) and $this->config->useInternalExceptionHandler){
+            set_exception_handler(array($this,'exceptionHandler'));
+        }
+        
+        if (isset($this->config->useInternalAutoloader) and $this->config->useInternalAutoloader){
+            spl_autoload_register(array($this,'autoloader'));
+        }
         
         /**
          * Load Default request module
@@ -106,20 +136,24 @@ class Superglue {
         $controllerName = ucfirst($this->request->segment(0));
         if (class_exists($controllerName)){
             
+            // get all segments starting from second
             $params = $this->request->segments(1);
             
             if (empty($params)){
-                $methodName = 'Index';
+                $method = 'Index';
             } else {
-                $methodName = ucfirst(array_shift($params));
+                $method = ucfirst(array_shift($params));
             }
-            $methodName = $this->request->method() . $methodName;
             
-            $reflect = new ReflectionClass($controllerName);
-            if ($reflect->implementsInterface('\Superglue\Interfaces\Controller')
-                    and $reflect->hasMethod($methodName)){
+            foreach(array($this->request->method().':method','any:method','catchAll') as $action){
+                $methodName = str_replace(':method',$method,$action);
                 
-                return $this->serveController($controllerName, $methodName, $params);
+                $reflect = new ReflectionClass($controllerName);
+                if ($reflect->implementsInterface('\Superglue\Interfaces\Controller')
+                        and $reflect->hasMethod($methodName)){
+
+                    return $this->serveController($controllerName, $methodName, $params);
+                }
             }
         }
         
@@ -133,10 +167,10 @@ class Superglue {
         }
         
         
-        throw new NotFoundException("Controller/method not found: {$controller}/{$method}");
+        throw new NotFoundException($this->request->uri());
     }
     
-    public function serveController($controller, $method, $params){
+    public function serveController($controllerName, $methodName, $params){
         $controller = new $controllerName();
         return call_user_func_array(array($controller,$methodName),$params);
     }
@@ -218,4 +252,5 @@ class Superglue {
         include $path;
         return ob_get_clean();
     }
+    
 }

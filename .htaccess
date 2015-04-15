@@ -2,21 +2,24 @@ SetEnv SUPERGLUE_VERSION 0.1-git_1
 SetEnv SUPERGLUE_BASE http://superglue.local:8000/
 SetEnv SUPERGLUE_CALLBACK 
 
+#AddType text/css .css
+#AddType "application/x-javascript; charset=UTF-8" .js
+
+<IfModule mod_negotiation.c>
+    Options -MultiViews
+</IfModule>
 
 <IfModule mod_headers.c>
     Header add X-Superglue-Version "%{SUPERGLUE_VERSION}e"
     Header add X-Superglue-Base "%{SUPERGLUE_BASE}e"
 
-    <Files ~ "\.">
+    <FilesMatch ^.+/([^/.]+)$>
         Header set X-Superglue-Dotless "text/html Content-Type was forced"
         Header set Content-Type "text/html"
-    </Files>
+    </FilesMatch>
 </IfModule>
 
 <IfModule mod_rewrite.c>
-#    <IfModule mod_negotiation.c>
-#        Options -MultiViews
-#    </IfModule>
 
 #    AddType application/x-httpd-php .php .phar
 

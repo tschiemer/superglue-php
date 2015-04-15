@@ -1,0 +1,99 @@
+
+.sg-editing-menu-container {
+	pointer-events: 	all;
+	cursor: 			default !important;
+	position: 			relative;
+	width: 				30px;
+	height: 			30px;
+	margin: 			0px;
+	font-family: 		Dosis, sans-serif;
+	letter-spacing: 	1px;
+
+}
+
+button#sg-editing-menu-save {
+	position: 			relative;
+	cursor: 			pointer;
+	width: 				30px;
+	height: 			30px;
+	margin: 			0;
+	padding: 			1px 6px;
+	border: 			none;
+	outline: 			none;
+	overflow: 			visible;
+
+	background-color: 		rgb(255, 41, 61);
+	background-repeat: 		no-repeat;
+	background-size: 		30px auto;
+	background-position:	center;
+	-webkit-appearance: 	button;
+}
+
+.sg-editing-menu-container.active > .sg-editing-menu-button {
+	background-color: 		rgb(183, 12, 29);
+}
+
+.sg-editing-menu-button::-moz-focus-inner {
+	border: 0;
+}
+
+#sg-editing-document-menu-top > .sg-editing-menu-container {
+	float: 				left;
+	margin-right: 		5px;
+}
+
+#sg-editing-document-menu-left > .sg-editing-menu-container {
+	margin-bottom: 		5px;
+}
+
+
+
+.sg-editing-menu-panel {
+	position: 			relative;
+	top: 				-5px;
+	left: 				11px;
+	background-color: 	rgb(255, 41, 61);
+	border:				2px solid rgb(183, 12, 29);
+	padding: 			4px;
+	-moz-box-sizing: 	border-box;
+	-webkit-box-sizing: border-box;
+	box-sizing: 		border-box;
+}
+
+.sg-editing-menu-panel .sg-editing-menu-button {
+	display: 				inline-block;
+	padding: 				4px;
+	background-color: 		rgb(255, 41, 61);
+}
+
+.sg-editing-menu-panel .sg-editing-menu-button:hover, .sg-editing-menu-panel .sg-editing-menu-button.active {
+	background-color: 		rgb(183, 12, 29);
+}
+
+
+
+.sg-menu-triangle-top {
+	position: 		absolute;
+	width: 			0;
+	height: 		0;
+	border-style: 	solid;
+	border-width: 	0 15px 10px 15px;
+	border-color: 	transparent transparent rgb(183, 12, 29) transparent;
+}
+
+.sg-menu-triangle-right {
+	position: 		absolute;
+	width: 			0;
+	height: 		0;
+	border-style: 	solid;
+	border-width: 	20px 10px 20px 0;
+	border-color: 	transparent rgb(183, 12, 29) transparent transparent;
+}
+
+.sg-editing-menu-container input[type="text"] {
+	float: 			left;
+	border:			none;
+	margin: 		0px;
+	padding:		4px;
+	height: 		22px;
+}
