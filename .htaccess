@@ -1,6 +1,7 @@
 SetEnv SUPERGLUE_VERSION 0.1-git_1
-SetEnv SUPERGLUE_BASE http://superglue.local:8000/
-SetEnv SUPERGLUE_CALLBACK 
+#SetEnv SUPERGLUE_BASE http://localhost:8080/
+
+DirectoryIndex index.php index.html
 
 #AddType text/css .css
 #AddType "application/x-javascript; charset=UTF-8" .js
@@ -11,7 +12,7 @@ SetEnv SUPERGLUE_CALLBACK
 
 <IfModule mod_headers.c>
     Header add X-Superglue-Version "%{SUPERGLUE_VERSION}e"
-    Header add X-Superglue-Base "%{SUPERGLUE_BASE}e"
+#    Header add X-Superglue-Base "%{SUPERGLUE_BASE}e"
 
     <FilesMatch ^.+/([^/.]+)$>
         Header set X-Superglue-Dotless "text/html Content-Type was forced"
@@ -30,21 +31,16 @@ SetEnv SUPERGLUE_CALLBACK
 
     # Handle Commands
     RewriteCond %{REQUEST_METHOD} =POST
-    RewriteRule ^cmd Superglue.loader.php [L]
+    RewriteRule ^cmd Superglue.loader.php?PHP_AUTH_DIGEST_RAW=%{HTTP:Authorization} [QSA,L]
 
     # Handle File uploads
     RewriteCond %{REQUEST_METHOD} =PUT
-    RewriteRule ^ Superglue.loader.php [L]
+    RewriteRule ^ Superglue.loader.php?PHP_AUTH_DIGEST_RAW=%{HTTP:Authorization} [QSA,L]
 
     # Handle Special-Calls
     RewriteCond %{REQUEST_FILENAME} !-d
     RewriteCond %{REQUEST_FILENAME} !-f
-#    RewriteCond %{REQUEST_URI} .*%{ENV:SUPERGLUE_CALLBACK}.*
-    RewriteCond expr "! %{REQUEST_URI} -strmatch '/${ENV:SUPGERGLUE_CALLBACK}*'"
-    RewriteRule ^ Superglue.loader.php [L]
+#    RewriteCond expr "! %{REQUEST_URI} -strmatch '/${ENV:SUPGERGLUE_CALLBACK}*'"
+    RewriteRule ^(.*) Superglue.loader.php?PHP_AUTH_DIGEST_RAW=%{HTTP:Authorization} [QSA,L]
 
-    # Handle Front Controller...
-#    RewriteCond %{REQUEST_FILENAME} !-d
-#    RewriteCond %{REQUEST_FILENAME} !-f
-#    RewriteRule ^ Superglue.loader.php [L]
 </IfModule>

@@ -2,6 +2,8 @@
 <html>
     <head>
         <link rel="stylesheet" href="<?php echo Superglue::resourceUrl('css/SuperGlue.css'); ?>" data-superglue-css="CSS4TextElement">
+        <link rel="stylesheet" href="<?php echo Superglue::resourceUrl('bower_components/codemirror/lib/codemirror.css') ?>">
+        <link rel="stylesheet" href="<?php echo Superglue::resourceUrl("bower_components/codemirror/theme/{$CodeMirror['theme']}.css") ?>">
         <style>
             html {
                 height:100%;
@@ -70,11 +72,29 @@
                 background-position: center;
                 -webkit-appearance: button;
             }
-            td.content {
+            /*td.content {*/
                 /*height: 100%;*/
+                /*text-align: center;*/
+                /**/
+            /*}*/
+            td.error {
                 text-align: center;
-                
             }
+            td.error .title {
+                margin: 20px 0;
+                color: red;
+                font-size: 40px;
+                font-decoration: none;
+            }
+            #editor {
+                height: 100%;
+                vertical-align: top;
+                text-align: left;
+            }
+            .CodeMirror {
+                height: 100%;
+            }
+
             
             #data {
 /*                display: block;
@@ -88,17 +108,18 @@
                  text-shadow: none;
                  outline: none;
             }*/
-            [contenteditable="true"]:focus {
-                border: 0;
-                outline: none;
-                
-            }
+            /*[contenteditable="true"]:focus {*/
+                /*border: 0;*/
+                /*outline: none;*/
+                /**/
+            /*}*/
         </style>
         
         <!--<link rel="stylesheet" href="http://prismjs.com/themes/prism.css">-->
         <!--<link rel="stylesheet" href="<?php echo Superglue::resourceUrl('bower_components/prism/themes/prism.css'); ?>" data-noprefix>-->
         <!--<link rel="stylesheet" href="<?php echo Superglue::resourceUrl('bower_components/prism/plugins/line-numbers/prism-line-numbers.css'); ?>" data-noprefix>-->
-        <link rel="stylesheet" href="<?php echo Superglue::resourceUrl('prismjs/prism.css'); ?>">
+<!--        <link rel="stylesheet" href="--><?php //echo Superglue::resourceUrl('prismjs/prism.css'); ?><!--">-->
+
     </head>
     <body>
         <!--<form id="form" method="PUT" action="<?php echo Superglue::request()->uri(); ?>">-->
@@ -130,93 +151,44 @@
                         </td>
                     </tr>
                     <tr>
-                        <td colspan="1" class="content" style="max-width:100%;">
-                            <div>
-                                <pre id="data" class="line-numbers" style="display:inline-block;"><code class="language-markup " contenteditable="true" onkeydown="enter(event);" onkeyup="edited(event);"><?php echo htmlentities(file_get_contents($realPath)); ?></code></pre>
-                            </div>
+                        <td colspan="1" class="content">
+                            <div id="editor"></div>
                         </td>
                     </tr>
                 </tbody>
             </table>
-        
-        <!--</form>-->
-<!--        <div id="controls">
-            <button>ff</button>
-        </div>-->
-<!--        <textarea id="data"><?php echo htmlentities(file_get_contents($realPath)); ?></textarea>-->
-<!--<script src="https://google-code-prettify.googlecode.com/svn/loader/run_prettify.js"></script>-->
 
-        <!--<script src="<?php echo Superglue::resourceUrl('bower_components/prism/components.js'); ?>"></script>-->
 
-<!--        <script src="<?php echo Superglue::resourceUrl('bower_components/prism/prism.js'); ?>" data-default-language="markup"></script>
-        <script src="<?php echo Superglue::resourceUrl('bower_components/prism/plugins/line-numbers/prism-line-numbers.min.js'); ?>"></script>
-        <script src="<?php echo Superglue::resourceUrl('bower_components/prism/components.js'); ?>"></script>
-        <script src="<?php echo Superglue::resourceUrl('bower_components/prism/code.js'); ?>"></script>-->
-
-        <script src="<?php echo Superglue::resourceUrl('prismjs/prism.js'); ?>"></script>
+        <script src="<?php echo Superglue::resourceUrl('bower_components/codemirror/lib/codemirror.js'); ?>"></script>
+        <script src="<?php echo Superglue::resourceUrl('bower_components/nanoajax/nanoajax.min.js'); ?>"></script>
         <script>
-            
-            function enter(e){
-                var event = e || window.event;
-                var unicode=event.keyCode? event.keyCode : event.charCode;
-                console.log(unicode);
-                switch(unicode){
-                    case 9: // tab
-                        cancelEvent(event);
-                        var sel, range, html;
-                        var text = "    ";
-                        if (window.getSelection) {
-                            sel = window.getSelection();
-                            if (sel.getRangeAt && sel.rangeCount) {
-                                range = sel.getRangeAt(0);
-                                range.deleteContents();
-                                range.insertNode( document.createTextNode(text) );
-                            }
-                        } else if (document.selection && document.selection.createRange) {
-                            document.selection.createRange().text = text;
-                        }
-                        return;
-                }
+//            var editorConfig
+            var editor = null;
+
+            function requestFile(uri){
+                nanoajax.ajax("/raw"+uri+"?data=1",function(code,data){
+//                    console.log(code,data);
+                    if (code == 200){
+                        editor = CodeMirror(document.getElementById('editor'),{
+                            value: data,
+                            mode: "javascript",
+                            theme: "<?php echo $CodeMirror['theme']; ?>",
+                            lineNumbers: true
+                        })
+                    } else {
+
+                    }
+                });
             }
-            
-            function cancelEvent(event){
-                event.cancelBubble = true;
-                event.stopPropagation();
-                event.preventDefault();
+
+            requestFile("<?php echo $path; ?>");
+
+            function selectLanguage(lang){
             }
-            
-            var editTimeout = null;
-            var editTimeoutTime = 2;
-            function edited(e){
-                var event = e || window.event;
-                
-                if (editTimeout){
-                    window.clearTimeout(editTimeout);
-                }
-                
-                var unicode=event.keyCode? event.keyCode : event.charCode;
-                
-                switch(unicode){
-//                    case 9: // tab
-//                        cancelEvent(event);
-//                        return false;
-                    case 13: // enter
-//                        window.setTimeout(updateSyntax,100);
-                        break;
-                    default:
-                        editTimeout = window.setTimeout(updateSyntax,editTimeoutTime*1000);       
-                }
-//                console.log(event,unicode);
-                
-            }
-            function updateSyntax(){
-                console.log('updated!');
-                Prism.highlightAll();
-            }
-            
             function save(){
-                var data = document.getElementById('data').textContent;
-                console.log(data);
+                console.log(editor.getValue());
+
+                editor.markClean();
             }
         </script>
     </body>

@@ -13,6 +13,11 @@ interface Request {
      * @return string
      */
     public function uri();
+
+    /**
+     * @return string
+     */
+    public function queryString();
     
     /**
      * @param int $i
@@ -25,12 +30,19 @@ interface Request {
      * @param int $to
      */
     public function segments($from=NULL,$to=NULL);
-    
+
+
+    /**
+     * @return mixed
+     */
+    public function arg($var,$default=NULL);
+
     /**
      * @return mixed
      */
     public function content();
-//    
+//
+
 //    /**
 //     * 
 //     * @param string $filename

@@ -2,8 +2,10 @@
 
 namespace Superglue\Auth;
 
+use Superglue\Exceptions\Exception;
+
 class Http implements \Superglue\Interfaces\Auth {
-    
+
     protected $method = 'basic';
     
     protected $realm = 'superglue';
@@ -13,7 +15,15 @@ class Http implements \Superglue\Interfaces\Auth {
     public function __construct($options=array()){
         
         if (strpos(strtolower(php_sapi_name()),'cgi')){
-            throw new \Superglue\Exception("Can NOT use HTTP authentication when PHP is running as CGI module.");
+            $authorization = isset($_GET['PHP_AUTH_DIGEST_RAW']) ? $_GET['PHP_AUTH_DIGEST_RAW'] : FALSE;
+            if (!empty($authorization)){
+                list($method,$credentials) = explode(' ',$authorization);
+                if (strtolower($method) === 'basic'){
+                    list($_SERVER['PHP_AUTH_USER'],$_SERVER['PHP_AUTH_PW']) = explode(':',base64_decode($credentials));
+                } else {
+                    throw new Exception("Currently only Basic Authentication is supported when PHP is running as CGI module.");
+                }
+            }
         }
         
         if (isset($options['method'])){
@@ -35,6 +45,7 @@ class Http implements \Superglue\Interfaces\Auth {
                 break;
                 
             case 'digest':
+                throw new Exception("HTTP Digest Authentication is currently not supported, sorry.");
                 break;
         }
         
@@ -42,7 +53,7 @@ class Http implements \Superglue\Interfaces\Auth {
     
     public function authorize(){
         if (! $this->isAuthorized()){
-            header('WWW-Authenticate: Basic realm="My Realm"');
+            header("WWW-Authenticate: Basic realm=\"{$this->realm}\"");
             header('HTTP/1.0 401 Unauthorized');
             echo 'Text, der gesendet wird, falls der Benutzer auf Abbrechen drückt';
             exit;

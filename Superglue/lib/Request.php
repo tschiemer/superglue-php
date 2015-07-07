@@ -15,6 +15,11 @@ class Request  implements \Superglue\Interfaces\Request {
      * @var sring
      */
     protected $uri;
+
+    /**
+     * @var string
+     */
+    protected $queryString;
     
     /**
      *
@@ -40,6 +45,14 @@ class Request  implements \Superglue\Interfaces\Request {
         
         $basedir = dirname($_SERVER['SCRIPT_NAME']);
         $this->uri = substr($_SERVER['REQUEST_URI'], strlen($basedir)-1);
+
+        $queryPos = strpos($this->uri,'?');
+        if (is_int($queryPos)){
+            $this->queryString = substr($this->uri,$queryPos+1);
+            $this->uri = substr($this->uri,0,$queryPos);
+        } else {
+            $this->queryString = FALSE;
+        }
         
         $this->segments = explode('/',substr($this->uri,1));
         
@@ -71,6 +84,10 @@ class Request  implements \Superglue\Interfaces\Request {
     public function uri(){
         return $this->uri;
     }
+
+    public function queryString(){
+        return $this->queryString;
+    }
     
     public function segment($i){
         return $this->segments[$i];
@@ -82,10 +99,18 @@ class Request  implements \Superglue\Interfaces\Request {
         }
         return array_slice($this->segments, $from, $to - $from + 1);
     }
+
+    public function arg($var,$default=NULL){
+        if (array_key_exists($var,$_GET)){
+            return $_GET[$var];
+        }
+        if (array_key_exists($var,$_POST)){
+            return $_POST[$var];
+        }
+        return $default;
+    }
     
     public function content(){
-//        var_dump($this);
-//        exit;
         switch($this->contentType){
             case 'application/x-www-form-urlencoded':
                 return $_POST['data'];
@@ -101,6 +126,7 @@ class Request  implements \Superglue\Interfaces\Request {
                 
         }
     }
+
     
 //    public function file($filename){
 //        

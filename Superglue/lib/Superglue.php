@@ -25,6 +25,10 @@ class Superglue {
      * @var \Superglue\Config\Base
      */
     protected $config;
+
+    public static function config(){
+        return self::$instance->config;
+    }
     
     
     /**
@@ -53,28 +57,7 @@ class Superglue {
         return self::$instance->auth;
     }
     
-    
-    public function exceptionHandler(Exception $e){
-        
-        if ($e instanceof \Superglue\Exceptions\NotFoundException){
-            die('not found!');
-        }
-        if ($e instanceof \Superglue\Exceptions\NotAuthorizedException){
-            die('not authorized!');
-        }
-        echo 'Error ' . $e->getCode() . ': ' . $e->getMessage();
-        exit;
-    }
-    
-    public function autoloader ($class) {
-        $base_dir = __ROOT__  . DIRECTORY_SEPARATOR . 'Controllers' . DIRECTORY_SEPARATOR;
 
-        $file = $base_dir . $class . '.php';
-
-        if (file_exists($file)){
-            require $file;
-        }
-    }
     
     public function init(){
         
@@ -84,6 +67,10 @@ class Superglue {
         
         if (isset($this->config->useInternalAutoloader) and $this->config->useInternalAutoloader){
             spl_autoload_register(array($this,'autoloader'));
+        }
+
+        if (isset($this->config->useHelpers) and $this->config->useHelpers){
+            require_once __DIR__ . DIRECTORY_SEPARATOR . 'Helpers.php';
         }
         
         /**
@@ -113,6 +100,37 @@ class Superglue {
         assert($this->auth != NULL, "Authorization is set.");
         
         return $this;
+    }
+
+    public function exceptionHandler(Exception $e){
+
+        $data = array(
+            'exception' => $e,
+            'uri'       => $this->request()->uri()
+        );
+
+        if ($e instanceof \Superglue\Exceptions\NotAuthorizedException){
+            http_response_code(401);
+            echo self::loadResource('errors/generic.php',$data);
+        } elseif ($e instanceof \Superglue\Exceptions\NotFoundException){
+            http_response_code(404);
+            echo self::loadResource('errors/404-not-found.php',$data);
+        } else {
+            http_response_code(500);
+            echo self::loadResource('errors/generic.php',$data);
+        }
+
+        exit;
+    }
+
+    public function autoloader ($class) {
+        $base_dir = __ROOT__  . DIRECTORY_SEPARATOR . 'Controllers' . DIRECTORY_SEPARATOR;
+
+        $file = $base_dir . $class . '.php';
+
+        if (file_exists($file)){
+            require $file;
+        }
     }
     
     public function run(){
@@ -149,7 +167,7 @@ class Superglue {
                 $methodName = str_replace(':method',$method,$action);
                 
                 $reflect = new ReflectionClass($controllerName);
-                if ($reflect->implementsInterface('\Superglue\Interfaces\Controller')
+                if ($reflect->isSubclassOf('\Superglue\Interfaces\Controller')
                         and $reflect->hasMethod($methodName)){
 
                     return $this->serveController($controllerName, $methodName, $params);
@@ -172,6 +190,7 @@ class Superglue {
     
     public function serveController($controllerName, $methodName, $params){
         $controller = new $controllerName();
+        $controller->sg = $this;
         return call_user_func_array(array($controller,$methodName),$params);
     }
     
@@ -208,14 +227,13 @@ class Superglue {
     }
     
     
+
+    /*****************************************************/
+    /** Helper functions  **/
     
-    
-    public static function url($path){
+    public static function url($path)
+    {
         return self::$instance->config->url . $path;
-    }
-    
-    public static function callbackUrl($path){
-        return self::$instance->config->url . self::$instance->config->callbackPrefix . $path;
     }
     
     
@@ -246,10 +264,11 @@ class Superglue {
     }
     
     public static function loadResource($path,$vars=array()){
-        $path = self::resourcePath($path);
+        $SuperglueRealResourcePathNeverPassThisVariable = self::resourcePath($path);
         extract($vars);
+        unset($vars);
         ob_start();
-        include $path;
+        include $SuperglueRealResourcePathNeverPassThisVariable;
         return ob_get_clean();
     }
     

@@ -61,7 +61,7 @@ class Session implements \Superglue\Interfaces\Auth {
     
     
 //    public function getLogin(){
-//        echo \Superglue::loadResource('login.php');
+//        echo \Superglue::loadResource('auth.login.php');
 //    }
 //    
 //    public function postLogin(){

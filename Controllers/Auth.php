@@ -1,10 +1,10 @@
 <?php
 
-class Auth implements \Superglue\Interfaces\Controller {
+class Auth extends \Superglue\Interfaces\Controller {
     
     
     public function getLogin(){
-        echo \Superglue::loadResource('login.php');
+        echo \Superglue::loadResource('auth.login.php');
     }
     
     public function postLogin(){

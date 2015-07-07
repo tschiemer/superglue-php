@@ -1,6 +1,6 @@
 <?php
 
-class Teddy implements \Superglue\Interfaces\Controller {
+class Teddy extends \Superglue\Interfaces\Controller {
     
     public function getIndex(){
         echo "This is for real, dude!";

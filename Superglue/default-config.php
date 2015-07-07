@@ -1,18 +1,16 @@
 <?php
-//var_dump(dirname($_SERVER['SCRIPT_NAME']) . '/Superglue/resources/');
-//exit;
+
 return array(
     
     'useInternalExceptionHandler' => TRUE,
-    'useInternalAutoloader' => FALSE,
+    'useInternalAutoloader' => TRUE,
+    'useHelpers' => TRUE,
     
-    'url' => getenv('SUPERGLUE_BASE') ? getenv('SUPERGLUE_BASE') : str_replace('//','/',dirname($_SERVER['SCRIPT_NAME']) . '/'),
+    'url' => ((isset($_SERVER['HTTPS']) and $_SERVER['HTTPS']) ? 'https://' : 'http://') . $_SERVER['HTTP_HOST'] . str_replace('//','/',dirname($_SERVER['SCRIPT_NAME']) . '/'),
     
-    'callbackPrefix' => getenv('SUPERGLUE_CALLBACK') ? getenv('SUPERGLUE_CALLBACK') : '',
+    'publicPath' => __ROOT__,
     
-    'publicPath' => __ROOT__ . 'public' . DIRECTORY_SEPARATOR,
-    
-    'resourcePath' => __DIR__ . '/resources' . DIRECTORY_SEPARATOR,
+    'resourcePath' => __SUPERGLUE__ . '/resources' . DIRECTORY_SEPARATOR,
     'resourceUrl'   => str_replace('//','/',dirname($_SERVER['SCRIPT_NAME']) . '/Superglue/resources/'),
     
     'auth' => array(

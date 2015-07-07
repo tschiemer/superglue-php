@@ -1,5 +1,13 @@
 <?php
 
+define('__ROOT__', __DIR__ . DIRECTORY_SEPARATOR );
+
+if (getenv('__SUPERGLUE__')){
+    define('__SUPERGLUE__', getenv('__SUPERGLUE__'));
+} else {
+    define('__SUPERGLUE__', __DIR__ . DIRECTORY_SEPARATOR . 'Superglue' . DIRECTORY_SEPARATOR);
+}
+
 /**
  * An example of a project-specific implementation.
  * 
@@ -19,10 +27,10 @@ spl_autoload_register(function ($class) {
     $prefix = 'Superglue\\';
 
     // base directory for the namespace prefix
-    $base_dir = __DIR__.DIRECTORY_SEPARATOR.'Superglue'.DIRECTORY_SEPARATOR.'lib'.DIRECTORY_SEPARATOR;
+    $base_dir = __SUPERGLUE__ . 'lib' . DIRECTORY_SEPARATOR;
 
     if ($class == 'Superglue'){
-        require $base_dir . 'Superglue' . '.php';
+        require $base_dir . 'Superglue.php';
         return;
     }
 
@@ -50,11 +58,7 @@ spl_autoload_register(function ($class) {
 });
 
 
-
-
-define('__ROOT__', __DIR__ . DIRECTORY_SEPARATOR );
-
-$config =  new \Superglue\Config\Php( __ROOT__ .'Superglue.config.php' );
+$config =  new \Superglue\Config\Php( __DIR__ . DIRECTORY_SEPARATOR .'Superglue.config.php' );
 
 $superglue = new Superglue($config);
 
